@@ -11,7 +11,7 @@
 
 class WindowManager {
     public:
-    void CreateWindow(); // VOID FUNCTION TO CREATE A WINDOW
+    void InitializeWindow(); // VOID FUNCTION TO CREATE A WINDOW
 
     GLFWwindow* window;
 
