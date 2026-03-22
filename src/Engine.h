@@ -7,9 +7,17 @@
 
 #include <vulkan/vulkan.h>
 #include "Managers/WindowManager/WindowManager.h"
+#include "glm/gtc/matrix_transform.hpp"
 
-#include <vector>
 #include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <chrono>
+#include <functional>
+
+using namespace std::placeholders;
 
 class Engine {
 
@@ -40,6 +48,11 @@ class Engine {
 
         VkCommandPool m_commandPool;
 
+        VkDeviceMemory m_vertexBufferMemory;
+        VkDeviceMemory m_indexBufferMemory;
+        VkVertexInputBindingDescription m_vertexBindingDescription;
+        std::vector<VkVertexInputAttributeDescription> m_vertexAttributeDescriptions;
+
         /* VULKAN FUNCTIONS*/
         void InitVulkan(WindowManager* windowManager);
 
@@ -58,6 +71,8 @@ class Engine {
         void CreateSemaphores();
 
         void CreateCommandPool();
+
+        VkBool32 GetMemoryType(uint32_t typeBits, VkFlags properties, uint32_t* typeIndex);
 
         void CreateVertexBuffer();
 
