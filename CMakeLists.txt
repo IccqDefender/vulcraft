@@ -3,36 +3,35 @@ project(vulcraft)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(IMGUI_DIR external/imgui-1.92.6-docking)
-
-# Создаем статическую библиотеку из исходников ImGui
-add_library(imgui STATIC
-        ${IMGUI_DIR}/imgui.cpp
-        ${IMGUI_DIR}/imgui_draw.cpp
-        ${IMGUI_DIR}/imgui_widgets.cpp
-        ${IMGUI_DIR}/imgui_tables.cpp
-        ${IMGUI_DIR}/imgui_demo.cpp
-        src/Managers/ImGuiManager/ImGuiManager.cpp
-        src/Managers/ImGuiManager/ImGuiManager.h
-        src/Managers/VulkanManager/VulkanManager.cpp
-        src/Managers/VulkanManager/VulkanManager.h
-)
-
-# Добавляем папку с заголовками
-target_include_directories(imgui PUBLIC ${IMGUI_DIR})
-
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(external/glfw)
 
-add_executable(vulcraft main.cpp
+
+
+add_executable(vulcraft
+        main.cpp
         src/Managers/WindowManager/WindowManager.cpp
         src/Managers/WindowManager/WindowManager.h
+        src/Managers/VulkanManager/VulkanManager.cpp
+        src/Managers/VulkanManager/VulkanManager.h
+        src/Managers/ImGuiManager/ImGuiManager.cpp
+        src/Managers/ImGuiManager/ImGuiManager.h
         src/Engine.cpp
         src/Engine.h
 
 )
+target_sources(vulcraft PRIVATE
+        external/imgui/imgui.cpp
+        external/imgui/imgui_demo.cpp
+        external/imgui/imgui_draw.cpp
+        external/imgui/imgui_tables.cpp
+        external/imgui/imgui_widgets.cpp
+        # Бэкенды для GLFW и Vulkan
+        external/imgui/backends/imgui_impl_glfw.cpp
+        external/imgui/backends/imgui_impl_vulkan.cpp
+)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan glfw imgui)
+target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan glfw)
 
-target_include_directories(${PROJECT_NAME} PRIVATE external/glfw/include)
+target_include_directories(${PROJECT_NAME} PRIVATE external/glfw/include external/imgui external/imgui/backends)
