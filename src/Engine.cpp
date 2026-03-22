@@ -31,6 +31,7 @@ void Engine::InitVulkan( WindowManager *windowManager ) {
     FindQueueFamilies();
     CreateLogicalDevice();
     CreateSemaphores();
+    CreateCommandPool();
 }
 
 void Engine::VulkanCreateInstance() {
@@ -258,6 +259,20 @@ void Engine::CreateSemaphores() {
         } else {
             std::cout << "[VULKAN]: Created semaphores" << std::endl;
         }
+}
+
+void Engine::CreateCommandPool() {
+    // Create graphics command pool
+    VkCommandPoolCreateInfo poolCreateInfo = {};
+    poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolCreateInfo.queueFamilyIndex = m_graphicsQueueFamily;
+
+    if (vkCreateCommandPool(m_device, &poolCreateInfo, nullptr, &m_commandPool) != VK_SUCCESS) {
+        std::cerr << "[VULKAN]: Failed to create command queue for graphics queue family" << std::endl;
+        exit(1);
+    } else {
+        std::cout << "[VULKAN]: Created command pool for graphics queue family" << std::endl;
+    }
 }
 
 /* MAIN LOOP */

@@ -38,6 +38,7 @@ class Engine {
         VkSemaphore m_imageAvailableSemaphore;
         VkSemaphore m_renderingFinishedSemaphore;
 
+        VkCommandPool m_commandPool;
 
         /* VULKAN FUNCTIONS*/
         void InitVulkan(WindowManager* windowManager);
