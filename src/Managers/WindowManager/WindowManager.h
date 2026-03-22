@@ -1,7 +1,3 @@
-//
-// Created by user on 21.03.2026.
-//
-
 #ifndef VULCRAFT_WINDOWMANAGER_H
 #define VULCRAFT_WINDOWMANAGER_H
 
@@ -18,10 +14,10 @@ class WindowManager {
     private:
     /* WINDOW SETTINGS */
 
-    uint32_t WINDOW_WIDTH = 800; // WINDOW WIDTH
-    uint32_t WINDOW_HEIGHT = 600; // WINDOW HEIGHT
+    uint32_t m_WINDOW_WIDTH = 800; // WINDOW WIDTH
+    uint32_t m_WINDOW_HEIGHT = 600; // WINDOW HEIGHT
 
-    std::string WINDOW_TITLE = "Vulcraft"; // WINDOW TITLE
+    std::string m_WINDOW_TITLE = "Vulcraft"; // WINDOW TITLE
 
 };
 

@@ -17,23 +17,73 @@ class Engine {
         void Run();
 
     private:
-        VkInstance m_instance = nullptr;
-        VkSurfaceKHR m_surface = nullptr;
-        VkPhysicalDevice m_physicalDevice = nullptr;
-        VkDevice m_device = nullptr;
-        VkQueue m_graphicsQueue = nullptr;
 
+        /* VULKAN PROPERTIES */
+        VkInstance m_instance;
+
+        VkSurfaceKHR m_windowSurface;
+
+        VkPhysicalDevice m_physicalDevice;
+        VkPhysicalDeviceMemoryProperties m_deviceMemoryProperties;
+        VkDevice m_device;
+
+        VkQueue m_graphicsQueue;
+        VkQueue m_presentQueue;
+        uint32_t m_graphicsQueueFamily;
+        uint32_t m_presentQueueFamily;
+
+        VkBuffer m_vertexBuffer;
+        VkBuffer m_indexBuffer;
+
+        VkSemaphore m_imageAvailableSemaphore;
+        VkSemaphore m_renderingFinishedSemaphore;
+
+
+        /* VULKAN FUNCTIONS*/
+        void InitVulkan(WindowManager* windowManager);
+
+        void VulkanCreateInstance();
+
+        void CreateWindowSurface(WindowManager* windowManager);
+
+        void FindPhysicalDevice();
+
+        void CheckSwapChainSupport();
+
+        void FindQueueFamilies();
+
+        void CreateLogicalDevice();
+
+        void CreateSemaphores();
+
+        void CreateCommandPool();
+
+        void CreateVertexBuffer();
+
+        void CreateUniformBuffer();
+
+        void CreateSwapChain();
+
+        void CreateRenderPass();
+
+        void CreateImageViews();
+
+        void CreateFramebuffers();
+
+        void CreateGraphicsPipeline();
+
+        void CreateDescriptorPool();
+
+        void CreateDescriptorSet();
+
+        void CreateCommandBuffers();
+
+        /* ENGINE FUNCTIONS */
         void MainLoop(WindowManager* windowManager);
         void Cleanup(WindowManager* windowManager);
 
+        /* GLFW FUNCTIONS */
         void InitGLFW();
-
-        void InitVulkan(WindowManager* windowManager);
-        void VulkanInstantiate();
-
-        void CreateSurface(WindowManager* windowManager);
-        void PickPhysicalDevice();
-        void CreateLogicalDevice();
 
 };
 
