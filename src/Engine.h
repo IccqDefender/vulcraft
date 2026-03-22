@@ -51,6 +51,7 @@ class Engine {
         VkSemaphore m_renderingFinishedSemaphore;
 
         VkCommandPool m_commandPool;
+        std::vector<VkCommandBuffer> m_graphicsCommandBuffers;
 
         VkDeviceMemory m_vertexBufferMemory;
         VkDeviceMemory m_indexBufferMemory;
