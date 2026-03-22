@@ -38,6 +38,7 @@ void Engine::InitVulkan( WindowManager *windowManager ) {
     CreateSemaphores();
     CreateCommandPool();
 	CreateVertexBuffer();
+	CreateUniformBuffer();
 }
 
 void Engine::VulkanCreateInstance() {
@@ -295,6 +296,30 @@ VkBool32 Engine::GetMemoryType(uint32_t typeBits, VkFlags properties, uint32_t* 
 	return false;
 }
 
+void Engine::UpdateUniformData() {
+	// Rotate based on time
+	auto timeNow = std::chrono::high_resolution_clock::now();
+	long long millis = std::chrono::duration_cast<std::chrono::milliseconds>(m_timeStart - timeNow).count();
+	float angle = (millis % 4000) / 4000.0f * glm::radians(360.f);
+
+	glm::mat4 modelMatrix;
+	modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(0, 0, 1));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(0.5f / 3.0f, -0.5f / 3.0f, 0.0f));
+
+	// Set up view
+	auto viewMatrix = glm::lookAt(glm::vec3(1, 1, 1), glm::vec3(0, 0, 0), glm::vec3(0, 0, -1));
+
+	// Set up projection
+	auto projMatrix = glm::perspective(glm::radians(70.f), 800 / (float) 600, 0.1f, 10.0f); // FIX IT
+
+	m_uniformBufferData.transformationMatrix = projMatrix * viewMatrix * modelMatrix;
+
+	void* data;
+	vkMapMemory(m_device, m_uniformBufferMemory, 0, sizeof(m_uniformBufferData), 0, &data);
+	memcpy(data, &m_uniformBufferData, sizeof(m_uniformBufferData));
+	vkUnmapMemory(m_device, m_uniformBufferMemory);
+}
+
 void Engine::CreateVertexBuffer() {
     // Setup vertices
 		std::vector<Vertex> vertices = {
@@ -437,6 +462,25 @@ void Engine::CreateVertexBuffer() {
 }
 
 void Engine::CreateUniformBuffer() {
+	VkBufferCreateInfo bufferInfo = {};
+	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.size = sizeof(m_uniformBufferData);
+	bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+
+	vkCreateBuffer(m_device, &bufferInfo, nullptr, &m_uniformBuffer);
+
+	VkMemoryRequirements memReqs;
+	vkGetBufferMemoryRequirements(m_device, m_uniformBuffer, &memReqs);
+
+	VkMemoryAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = memReqs.size;
+	GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &allocInfo.memoryTypeIndex);
+
+	vkAllocateMemory(m_device, &allocInfo, nullptr, &m_uniformBufferMemory);
+	vkBindBufferMemory(m_device, m_uniformBuffer, m_uniformBufferMemory, 0);
+
+	UpdateUniformData();
 }
 
 /* MAIN LOOP */

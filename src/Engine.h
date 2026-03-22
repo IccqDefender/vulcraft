@@ -22,6 +22,10 @@ using namespace std::placeholders;
 class Engine {
 
     public:
+        Engine() {
+            m_timeStart = std::chrono::high_resolution_clock::now();
+        }
+
         void Run();
 
     private:
@@ -53,6 +57,27 @@ class Engine {
         VkVertexInputBindingDescription m_vertexBindingDescription;
         std::vector<VkVertexInputAttributeDescription> m_vertexAttributeDescriptions;
 
+        struct {
+            glm::mat4 transformationMatrix;
+        } m_uniformBufferData;
+        VkBuffer m_uniformBuffer;
+        VkDeviceMemory m_uniformBufferMemory;
+        VkDescriptorSetLayout m_descriptorSetLayout;
+        VkDescriptorPool m_descriptorPool;
+        VkDescriptorSet m_descriptorSet;
+
+        VkExtent2D m_swapChainExtent;
+        VkFormat m_swapChainFormat;
+        VkSwapchainKHR m_oldSwapChain;
+        VkSwapchainKHR m_swapChain;
+        std::vector<VkImage> m_swapChainImages;
+        std::vector<VkImageView> m_swapChainImageViews;
+        std::vector<VkFramebuffer> m_swapChainFramebuffers;
+
+
+
+        std::chrono::high_resolution_clock::time_point m_timeStart;
+
         /* VULKAN FUNCTIONS*/
         void InitVulkan(WindowManager* windowManager);
 
@@ -73,6 +98,7 @@ class Engine {
         void CreateCommandPool();
 
         VkBool32 GetMemoryType(uint32_t typeBits, VkFlags properties, uint32_t* typeIndex);
+        void UpdateUniformData();
 
         void CreateVertexBuffer();
 
