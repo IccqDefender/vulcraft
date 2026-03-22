@@ -74,7 +74,9 @@ class Engine {
         std::vector<VkImageView> m_swapChainImageViews;
         std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
-
+        VkRenderPass m_renderPass;
+        VkPipeline m_graphicsPipeline;
+        VkPipelineLayout m_pipelineLayout;
 
         std::chrono::high_resolution_clock::time_point m_timeStart;
 
@@ -100,11 +102,15 @@ class Engine {
         VkBool32 GetMemoryType(uint32_t typeBits, VkFlags properties, uint32_t* typeIndex);
         void UpdateUniformData();
 
+        VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities, WindowManager* windowManager);
+        VkPresentModeKHR ChoosePresentMode(const std::vector<VkPresentModeKHR> presentModes);
+        VkSurfaceFormatKHR ChooseSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+
         void CreateVertexBuffer();
 
         void CreateUniformBuffer();
 
-        void CreateSwapChain();
+        void CreateSwapChain(WindowManager* windowManager);
 
         void CreateRenderPass();
 

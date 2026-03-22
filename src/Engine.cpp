@@ -39,6 +39,8 @@ void Engine::InitVulkan( WindowManager *windowManager ) {
     CreateCommandPool();
 	CreateVertexBuffer();
 	CreateUniformBuffer();
+	CreateSwapChain(windowManager);
+	CreateRenderPass();
 }
 
 void Engine::VulkanCreateInstance() {
@@ -295,7 +297,6 @@ VkBool32 Engine::GetMemoryType(uint32_t typeBits, VkFlags properties, uint32_t* 
 	}
 	return false;
 }
-
 void Engine::UpdateUniformData() {
 	// Rotate based on time
 	auto timeNow = std::chrono::high_resolution_clock::now();
@@ -318,6 +319,45 @@ void Engine::UpdateUniformData() {
 	vkMapMemory(m_device, m_uniformBufferMemory, 0, sizeof(m_uniformBufferData), 0, &data);
 	memcpy(data, &m_uniformBufferData, sizeof(m_uniformBufferData));
 	vkUnmapMemory(m_device, m_uniformBufferMemory);
+}
+
+VkExtent2D Engine::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities, WindowManager* windowManager) {
+	if (surfaceCapabilities.currentExtent.width == -1) {
+		VkExtent2D swapChainExtent = {};
+
+		swapChainExtent.width = std::min(std::max(windowManager->m_WINDOW_WIDTH, surfaceCapabilities.minImageExtent.width), surfaceCapabilities.maxImageExtent.width);
+		swapChainExtent.height = std::min(std::max(windowManager->m_WINDOW_HEIGHT, surfaceCapabilities.minImageExtent.height), surfaceCapabilities.maxImageExtent.height);
+
+		return swapChainExtent;
+	} else {
+		return surfaceCapabilities.currentExtent;
+	}
+}
+VkPresentModeKHR Engine::ChoosePresentMode(const std::vector<VkPresentModeKHR> presentModes) {
+	for (const auto& presentMode : presentModes) {
+		if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+			return presentMode;
+		}
+	}
+
+	// If mailbox is unavailable, fall back to FIFO (guaranteed to be available)
+	return VK_PRESENT_MODE_FIFO_KHR;
+}
+VkSurfaceFormatKHR Engine::ChooseSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+	// We can either choose any format
+	if (availableFormats.size() == 1 && availableFormats[0].format == VK_FORMAT_UNDEFINED) {
+		return{ VK_FORMAT_R8G8B8A8_UNORM, VK_COLORSPACE_SRGB_NONLINEAR_KHR };
+	}
+
+	// Or go with the standard format - if available
+	for (const auto& availableSurfaceFormat : availableFormats) {
+		if (availableSurfaceFormat.format == VK_FORMAT_R8G8B8A8_UNORM) {
+			return availableSurfaceFormat;
+		}
+	}
+
+	// Or fall back to the first available one
+	return availableFormats[0];
 }
 
 void Engine::CreateVertexBuffer() {
@@ -481,6 +521,157 @@ void Engine::CreateUniformBuffer() {
 	vkBindBufferMemory(m_device, m_uniformBuffer, m_uniformBufferMemory, 0);
 
 	UpdateUniformData();
+}
+
+void Engine::CreateSwapChain(WindowManager *windowManager) {
+	// Find surface capabilities
+		VkSurfaceCapabilitiesKHR surfaceCapabilities;
+		if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, m_windowSurface, &surfaceCapabilities) != VK_SUCCESS) {
+			std::cerr << "[VULKAN]: Failed to acquire presentation surface capabilities" << std::endl;
+			exit(1);
+		}
+
+		// Find supported surface formats
+		uint32_t formatCount;
+		if (vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, m_windowSurface, &formatCount, nullptr) != VK_SUCCESS || formatCount == 0) {
+			std::cerr << "[VULKAN]: Failed to get number of supported surface formats" << std::endl;
+			exit(1);
+		}
+
+		std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
+		if (vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, m_windowSurface, &formatCount, surfaceFormats.data()) != VK_SUCCESS) {
+			std::cerr << "[VULKAN]: Failed to get supported surface formats" << std::endl;
+			exit(1);
+		}
+
+		// Find supported present modes
+		uint32_t presentModeCount;
+		if (vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, m_windowSurface, &presentModeCount, nullptr) != VK_SUCCESS || presentModeCount == 0) {
+			std::cerr << "[VULKAN]: Failed to get number of supported presentation modes" << std::endl;
+			exit(1);
+		}
+
+		std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+		if (vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, m_windowSurface, &presentModeCount, presentModes.data()) != VK_SUCCESS) {
+			std::cerr << "[VULKAN]: Failed to get supported presentation modes" << std::endl;
+			exit(1);
+		}
+
+		// Determine number of images for swap chain
+		uint32_t imageCount = surfaceCapabilities.minImageCount + 1;
+		if (surfaceCapabilities.maxImageCount != 0 && imageCount > surfaceCapabilities.maxImageCount) {
+			imageCount = surfaceCapabilities.maxImageCount;
+		}
+
+		std::cout << "[VULKAN]: Using " << imageCount << " images for swap chain" << std::endl;
+
+		// Select a surface format
+		VkSurfaceFormatKHR surfaceFormat = ChooseSurfaceFormat(surfaceFormats);
+
+		// Select swap chain size
+		m_swapChainExtent = ChooseSwapExtent(surfaceCapabilities, windowManager);
+
+		// Determine transformation to use (preferring no transform)
+		VkSurfaceTransformFlagBitsKHR surfaceTransform;
+		if (surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
+			surfaceTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+		} else {
+			surfaceTransform = surfaceCapabilities.currentTransform;
+		}
+
+		// Choose presentation mode (preferring MAILBOX ~= triple buffering)
+		VkPresentModeKHR presentMode = ChoosePresentMode(presentModes);
+
+		// Finally, create the swap chain
+		VkSwapchainCreateInfoKHR createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		createInfo.surface = m_windowSurface;
+		createInfo.minImageCount = imageCount;
+		createInfo.imageFormat = surfaceFormat.format;
+		createInfo.imageColorSpace = surfaceFormat.colorSpace;
+		createInfo.imageExtent = m_swapChainExtent;
+		createInfo.imageArrayLayers = 1;
+		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		createInfo.queueFamilyIndexCount = 0;
+		createInfo.pQueueFamilyIndices = nullptr;
+		createInfo.preTransform = surfaceTransform;
+		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		createInfo.presentMode = presentMode;
+		createInfo.clipped = VK_TRUE;
+		createInfo.oldSwapchain = m_oldSwapChain;
+
+		if (vkCreateSwapchainKHR(m_device, &createInfo, nullptr, &m_swapChain) != VK_SUCCESS) {
+			std::cerr << "[VULKAN]: Failed to create swap chain" << std::endl;
+			exit(1);
+		} else {
+			std::cout << "[VULKAN]: Created swap chain" << std::endl;
+		}
+
+		if (m_oldSwapChain != VK_NULL_HANDLE) {
+			vkDestroySwapchainKHR(m_device, m_oldSwapChain, nullptr);
+		}
+		m_oldSwapChain = m_swapChain;
+
+		m_swapChainFormat = surfaceFormat.format;
+
+		// Store the images used by the swap chain
+		// Note: these are the images that swap chain image indices refer to
+		// Note: actual number of images may differ from requested number, since it's a lower bound
+		uint32_t actualImageCount = 0;
+		if (vkGetSwapchainImagesKHR(m_device, m_swapChain, &actualImageCount, nullptr) != VK_SUCCESS || actualImageCount == 0) {
+			std::cerr << "[VULKAN]: Failed to acquire number of swap chain images" << std::endl;
+			exit(1);
+		}
+
+		m_swapChainImages.resize(actualImageCount);
+
+		if (vkGetSwapchainImagesKHR(m_device, m_swapChain, &actualImageCount, m_swapChainImages.data()) != VK_SUCCESS) {
+			std::cerr << "[VULKAN]: Failed to acquire swap chain images" << std::endl;
+			exit(1);
+		}
+
+		std::cout << "[VULKAN]: Acquired swap chain images" << std::endl;
+}
+
+void Engine::CreateRenderPass() {
+	VkAttachmentDescription attachmentDescription = {};
+	attachmentDescription.format = m_swapChainFormat;
+	attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	// Note: hardware will automatically transition attachment to the specified layout
+	// Note: index refers to attachment descriptions array
+	VkAttachmentReference colorAttachmentReference = {};
+	colorAttachmentReference.attachment = 0;
+	colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	// Note: this is a description of how the attachments of the render pass will be used in this sub pass
+	// e.g. if they will be read in shaders and/or drawn to
+	VkSubpassDescription subPassDescription = {};
+	subPassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subPassDescription.colorAttachmentCount = 1;
+	subPassDescription.pColorAttachments = &colorAttachmentReference;
+
+	// Create the render pass
+	VkRenderPassCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	createInfo.attachmentCount = 1;
+	createInfo.pAttachments = &attachmentDescription;
+	createInfo.subpassCount = 1;
+	createInfo.pSubpasses = &subPassDescription;
+
+	if (vkCreateRenderPass(m_device, &createInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
+		std::cerr << "[VULKAN]: Failed to create render pass" << std::endl;
+		exit(1);
+	} else {
+		std::cout << "[VULKAN]: Created render pass" << std::endl;
+	}
 }
 
 /* MAIN LOOP */
