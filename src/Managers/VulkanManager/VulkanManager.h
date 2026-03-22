@@ -1,0 +1,10 @@
+
+#ifndef VULCRAFT_VULKANMANAGER_H
+#define VULCRAFT_VULKANMANAGER_H
+
+
+class VulkanManager {
+};
+
+
+#endif //VULCRAFT_VULKANMANAGER_H

@@ -1,0 +1,10 @@
+
+#ifndef VULCRAFT_IMGUIMANAGER_H
+#define VULCRAFT_IMGUIMANAGER_H
+
+
+class ImGuiManager {
+};
+
+
+#endif //VULCRAFT_IMGUIMANAGER_H

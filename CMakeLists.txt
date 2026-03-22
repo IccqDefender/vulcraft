@@ -12,6 +12,10 @@ add_library(imgui STATIC
         ${IMGUI_DIR}/imgui_widgets.cpp
         ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/imgui_demo.cpp
+        src/Managers/ImGuiManager/ImGuiManager.cpp
+        src/Managers/ImGuiManager/ImGuiManager.h
+        src/Managers/VulkanManager/VulkanManager.cpp
+        src/Managers/VulkanManager/VulkanManager.h
 )
 
 # Добавляем папку с заголовками
