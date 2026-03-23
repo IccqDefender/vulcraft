@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 
 int main() {
     glfwInit();
@@ -53,6 +54,14 @@ int main() {
 
     for (size_t i = 0; i < queueFamilyProperties.size(); i++) {
         VkQueueFamilyProperties queueFamily = queueFamilyProperties[i];
+
+        VkBool32 presentSupport = VK_TRUE;
+        vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+
+        if (presentSupport) {
+            presentQueueFamilyIndex = i;
+        }
+
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             graphicsQueueFamilyIndex = i;
             break;
@@ -60,17 +69,24 @@ int main() {
     }
 
     VkPhysicalDeviceFeatures deviceFeatures = {};
-    std::vector<VkDeviceQueueCreateInfo> deviceQueueCreateInfos;
-
     float queuePriority = 1.0f;
-    VkDeviceQueueCreateInfo queueCreateInfo = {};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueCount = 1;
-    queueCreateInfo.queueFamilyIndex = graphicsQueueFamilyIndex;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
 
+    std::vector<VkDeviceQueueCreateInfo> deviceQueueCreateInfos;
+    std::set<uint32_t> uniqueQueueFamilies = {
+        graphicsQueueFamilyIndex,
+        presentQueueFamilyIndex
+    };
 
-    deviceQueueCreateInfos.push_back(queueCreateInfo);
+    for (const uint32_t queueFamily : uniqueQueueFamilies) {
+        VkDeviceQueueCreateInfo queueCreateInfo = {};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.queueFamilyIndex = graphicsQueueFamilyIndex;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+
+        deviceQueueCreateInfos.push_back(queueCreateInfo);
+    }
+
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
