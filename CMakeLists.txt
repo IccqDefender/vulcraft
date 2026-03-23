@@ -11,15 +11,8 @@ add_subdirectory(external/glfw)
 
 add_executable(vulcraft
         main.cpp
-        src/Managers/WindowManager/WindowManager.cpp
-        src/Managers/WindowManager/WindowManager.h
-        src/Managers/VulkanManager/VulkanManager.cpp
-        src/Managers/VulkanManager/VulkanManager.h
-        src/Managers/ImGuiManager/ImGuiManager.cpp
-        src/Managers/ImGuiManager/ImGuiManager.h
         src/Engine.cpp
         src/Engine.h
-
 )
 target_sources(vulcraft PRIVATE
         external/imgui/imgui.cpp
