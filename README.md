@@ -1,8 +1,15 @@
 # VulCraft Project
+
+### VulCraft - Simple 3D voxel Game Engine created by using Vulkan SDK
+- The main goal is to use the main technologies of the Vulkan SDK to develop your abilities
 ##
 
 
-### VulCraft - Simple 3D voxel Game Engine created by using Vulkan SDK
+### Used Tools
+- Vulkan SDK
+- GLFW
+- GLM
+- ImGUI
 
 ##
 
