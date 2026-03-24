@@ -268,6 +268,40 @@ int main() {
     VkShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
 
+    VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
+    vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vertShaderStageCreateInfo.module = vertShaderModule;
+    vertShaderStageCreateInfo.pName = "main";
+
+    VkPipelineShaderStageCreateInfo fragShaderStageCreateInfo = {};
+    vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    vertShaderStageCreateInfo.module = fragShaderModule;
+    vertShaderStageCreateInfo.pName = "main";
+
+    VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageCreateInfo, fragShaderStageCreateInfo};
+
+    VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
+    vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
+    vertexInputStateCreateInfo.vertexBindingDescriptionCount= 0;
+
+    VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
+    inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
+
+    VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
+    graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    graphicsPipelineCreateInfo.stageCount = 2;
+    graphicsPipelineCreateInfo.pStages = shaderStages;
+    graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
+    graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+
+    VkPipeline graphicPipeline = {};
+    vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &graphicPipeline);
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
     }
