@@ -7,12 +7,12 @@ find_package(Vulkan REQUIRED)
 
 add_subdirectory(external/glfw)
 
-
-
 add_executable(vulcraft
         main.cpp
-        src/Engine.cpp
-        src/Engine.h
+        src/vkengine.cpp
+        src/vkengine.h
+        src/Services/WindowManager/WindowManager.cpp
+        src/Services/WindowManager/WindowManager.h
 )
 target_sources(vulcraft PRIVATE
         external/imgui/imgui.cpp

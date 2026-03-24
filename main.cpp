@@ -8,6 +8,8 @@
 #include <fstream>
 #include <queue>
 
+#include "src/Services/WindowManager/WindowManager.h"
+
 VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
     VkShaderModuleCreateInfo shaderModuleCreateInfo = {};
     shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -81,12 +83,9 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, VkR
 }
 
 int main() {
-    glfwInit();
 
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Vulcraft", nullptr, nullptr);
+    auto* _windowManager = new WindowManager();
+    _windowManager->CreateWindow();
 
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -109,7 +108,7 @@ int main() {
     VkInstance instance;
     vkCreateInstance(&createInfo, nullptr, &instance);
     VkSurfaceKHR surface;
-    glfwCreateWindowSurface(instance, window, nullptr, &surface);
+    glfwCreateWindowSurface(instance, _windowManager->g_window, nullptr, &surface);
 
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -317,8 +316,8 @@ int main() {
     VkRenderPass renderPass;
     vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass);
 
-    std::vector<char> vertShaderCode = readFile("../shaders/vert.spv");
-    std::vector<char> fragShaderCode = readFile("../shaders/frag.spv");
+    std::vector<char> vertShaderCode = readFile("../shaders/Triangle/vert.spv");
+    std::vector<char> fragShaderCode = readFile("../shaders/Triangle/frag.spv");
 
     VkShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
@@ -470,7 +469,7 @@ int main() {
 
     uint32_t currentFrame = 0;
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(_windowManager->g_window)) {
         glfwPollEvents();
 
         uint32_t imageIndex;
@@ -509,7 +508,7 @@ int main() {
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    glfwTerminate();
+    delete(_windowManager);
 
     return 0;
 }
