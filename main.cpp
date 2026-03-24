@@ -1,9 +1,31 @@
 #define GLFW_INCLUDE_VULKAN
+#include <filesystem>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <vector>
 #include <set>
+#include <fstream>
+
+std::vector<char> readFile(std::string filePath) {
+    std::ifstream file(filePath, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file: " + filePath);
+    }
+
+    std::streamsize fileSize = file.tellg();
+    if (fileSize < 0) {
+        throw std::runtime_error("Failed to get file size: " + filePath);
+    }
+
+    std::vector<char> buffer(static_cast<size_t>(fileSize));
+
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+
+    return buffer;
+}
 
 int main() {
     glfwInit();
@@ -197,6 +219,39 @@ int main() {
         vkCreateImageView(device, &imageViewCreateInfo, nullptr, &swapChainImageViews[i]);
 
     }
+
+    VkAttachmentDescription attachmentDescription = {};
+    attachmentDescription.format = swapChainImageFormat;
+    attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+    attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference colorAttachmentReference = {};
+    colorAttachmentReference.attachment = 0;
+    colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpassDescription = {};
+    subpassDescription.colorAttachmentCount = 1;
+    subpassDescription.pColorAttachments = &colorAttachmentReference;
+    subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+
+    VkRenderPassCreateInfo renderPassCreateInfo = {};
+    renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassCreateInfo.attachmentCount = 1;
+    renderPassCreateInfo.pAttachments = &attachmentDescription;
+    renderPassCreateInfo.subpassCount = 1;
+    renderPassCreateInfo.pSubpasses = &subpassDescription;
+
+    VkRenderPass renderPass;
+    vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass);
+
+    std::vector<char> vertShaderCode = readFile("../shaders/vert.spv");
+    std::vector<char> fragShaderCode = readFile("../shaders/frag.spv");
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
