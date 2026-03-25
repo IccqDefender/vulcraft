@@ -13,8 +13,8 @@ public:
     void DrawFrame();
 
 private:
-    Device* m_device = nullptr;
-    Swapchain* m_swapchain = nullptr;
+    VkDevice m_device = Device().GetDevice();
+    VkSwapchainKHR m_swapchain = Swapchain().GetSwapchain();
 
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
     VkPipeline m_pipeline = VK_NULL_HANDLE;

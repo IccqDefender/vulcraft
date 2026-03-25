@@ -6,6 +6,7 @@ void VKengine::Init() {
 }
 
 void VKengine::InitVulkan() {
+    m_Device.Init(m_WindowManager.GetWindow());
 }
 
 void VKengine::Run() {
