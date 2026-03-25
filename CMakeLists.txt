@@ -8,11 +8,21 @@ find_package(Vulkan REQUIRED)
 add_subdirectory(external/glfw)
 
 add_executable(vulcraft
-        main.cpp
-        src/vkengine.cpp
-        src/vkengine.h
-        src/Services/WindowManager/WindowManager.cpp
-        src/Services/WindowManager/WindowManager.h
+        src/main.cpp
+        src/Window/WindowManager.cpp
+        src/Window/WindowManager.h
+        src/Renderer/Renderer.h
+        src/Renderer/Pipeline.h
+        src/Core/Device.h
+        src/Renderer/Renderer.cpp
+        src/Core/Device.cpp
+        src/Renderer/Shader.cpp
+        src/Renderer/Shader.h
+        src/Renderer/Pipeline.cpp
+        src/Core/Swapchain.cpp
+        src/Core/Swapchain.h
+        src/Core/VKengine.cpp
+        src/Core/VKengine.h
 )
 target_sources(vulcraft PRIVATE
         external/imgui/imgui.cpp

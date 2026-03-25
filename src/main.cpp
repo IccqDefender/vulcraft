@@ -8,7 +8,7 @@
 #include <fstream>
 #include <queue>
 
-#include "src/Services/WindowManager/WindowManager.h"
+#include "Window/WindowManager.h"
 
 VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
     VkShaderModuleCreateInfo shaderModuleCreateInfo = {};
@@ -84,8 +84,8 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, VkR
 
 int main() {
 
-    auto* _windowManager = new WindowManager();
-    _windowManager->CreateWindow();
+    WindowManager _windowManager;
+    _windowManager.CreateWindow();
 
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -108,7 +108,7 @@ int main() {
     VkInstance instance;
     vkCreateInstance(&createInfo, nullptr, &instance);
     VkSurfaceKHR surface;
-    glfwCreateWindowSurface(instance, _windowManager->g_window, nullptr, &surface);
+    glfwCreateWindowSurface(instance, _windowManager.GetWindow(), nullptr, &surface);
 
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -469,8 +469,8 @@ int main() {
 
     uint32_t currentFrame = 0;
 
-    while (!glfwWindowShouldClose(_windowManager->g_window)) {
-        glfwPollEvents();
+    while (!_windowManager.ShouldClose()) {
+        _windowManager.PollEvents();
 
         uint32_t imageIndex;
         vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
@@ -507,8 +507,6 @@ int main() {
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
-
-    delete(_windowManager);
 
     return 0;
 }
