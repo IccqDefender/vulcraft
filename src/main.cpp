@@ -8,6 +8,9 @@
 #include <fstream>
 #include <queue>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
 #include "Window/WindowManager.h"
 
 VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
@@ -468,6 +471,23 @@ int main() {
     }
 
     uint32_t currentFrame = 0;
+
+    /* CREATE IMGUI */
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForVulkan(_windowManager.GetWindow(), true);
+
+    VkQueue imguiQueue;
+    vkGetDeviceQueue(device, graphicsQueueFamilyIndex, 0, &imguiQueue);
+
+    ImGui_ImplVulkan_InitInfo imguiInitInfo = {};
+    imguiInitInfo.Device = device;
+    imguiInitInfo.Instance = instance;
+    imguiInitInfo.PhysicalDevice = physicalDevice;
+    imguiInitInfo.Queue = imguiQueue;
+    imguiInitInfo.MinImageCount = 2;
+
+
+    ImGui_ImplVulkan_Init(&imguiInitInfo);
 
     while (!_windowManager.ShouldClose()) {
         _windowManager.PollEvents();
