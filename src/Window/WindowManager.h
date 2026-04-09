@@ -2,28 +2,23 @@
 #define VULCRAFT_WINDOWMANAGER_H
 
 #define GLFW_INCLUDE_VULKAN
-#include <filesystem>
 #include <GLFW/glfw3.h>
 
-class WindowManager {
-public:
-    WindowManager();
+namespace vulcraft {
+    class WindowManager {
+        public:
+        WindowManager();
+        ~WindowManager();
 
-    void CreateWindow();
-    void Cleanup();
+        void CreateWindow(uint32_t width, uint32_t height, char* title);
 
-    bool ShouldClose() { return glfwWindowShouldClose(m_window); } ;
-    void PollEvents() { glfwPollEvents(); };
+        bool IsWindowShouldClose(GLFWwindow* window) { return glfwWindowShouldClose(window); };
+        GLFWwindow* GetWindow() { return m_window; };
 
-    GLFWwindow* GetWindow() { return m_window; }
+        private:
+        GLFWwindow* m_window = nullptr;
 
-private:
-    void InitWindowManager();
-
-    GLFWwindow* m_window;                                      // CREATE GLOBAL VAR. GLFW WINDOW
-    const unsigned int m_WINDOW_WIDTH  = 800;                  //WINDOW SETTINGS ( WIDTH )
-    const unsigned int m_WINDOW_HEIGHT = 600;                  //WINDOW SETTINGS ( HEIGHT )
-};
-
+    };
+} // vulcraft
 
 #endif //VULCRAFT_WINDOWMANAGER_H

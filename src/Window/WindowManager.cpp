@@ -1,21 +1,30 @@
+//
+// Created by user on 09.04.2026.
+//
+
 #include "WindowManager.h"
 
-WindowManager::WindowManager() {
-    InitWindowManager();
-}
+#include <stdexcept>
 
-void WindowManager::InitWindowManager() {
-    glfwInit();
+namespace vulcraft {
+    WindowManager::WindowManager() {
+        if (!glfwInit()) {
+            throw std::runtime_error("GLFW: failed to initialize!");
+        }
+    }
 
-}
+    WindowManager::~WindowManager() {
+    }
 
-void WindowManager::CreateWindow() {
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    void WindowManager::CreateWindow(uint32_t width, uint32_t height, char* title) {
+        glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
+        glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    m_window = glfwCreateWindow(m_WINDOW_WIDTH, m_WINDOW_HEIGHT, "Vulcraft", nullptr, nullptr);
-}
+        m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+        if (!m_window) {
+            throw std::runtime_error("GLFW: failed to create window!");
+        }
 
-void WindowManager::Cleanup() {
-    glfwTerminate();
-}
+        glfwMakeContextCurrent(m_window);
+    }
+} // vulcraft
