@@ -13,10 +13,7 @@ namespace vulcraft {
         }
     }
 
-    WindowManager::~WindowManager() {
-    }
-
-    void WindowManager::CreateWindow(uint32_t width, uint32_t height, char* title) {
+    void WindowManager::CreateWindow(uint32_t width, uint32_t height, const char* title) {
         glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
         glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 

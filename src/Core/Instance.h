@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <vector>
 
 namespace vulcraft {
     class Instance {
@@ -22,12 +23,16 @@ namespace vulcraft {
         VkApplicationInfo m_appInfo = {};
         VkInstanceCreateInfo m_createInfo = {};
 
-        uint32_t m_extensionCount = 0;
-        const char** m_extensions = nullptr;
-
         VkResult m_result;
 
+        const std::vector<const char*> m_validationLayers = {
+            "VK_LAYER_KHRONOS_validation"
+        };
+
         void CreateInstance();
+        bool CheckValidationLayerSupport();
+
+        std::vector<const char*> GetRequiredExtensions();
 
     };
 } // vulcraft

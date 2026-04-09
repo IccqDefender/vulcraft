@@ -15,6 +15,8 @@ add_executable(vulcraft
         src/Window/WindowManager.h
         src/Core/Instance.cpp
         src/Core/Instance.h
+        src/Core/Device.cpp
+        src/Core/Device.h
 )
 target_sources(vulcraft PRIVATE
         external/imgui/imgui.cpp

@@ -4,11 +4,56 @@
 
 #include "Instance.h"
 
+#include <cstring>
 #include <stdexcept>
+
+#ifdef NDEBUG
+const bool enableValidationLayers = false;
+#else
+const bool enableValidationLayers = true;
+#endif
 
 namespace vulcraft {
     void Instance::InitVulkan() {
         CreateInstance();
+    }
+
+    bool Instance::CheckValidationLayerSupport() {
+        uint32_t layerCount;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+        for (const char* layerName : m_validationLayers) {
+            bool layerFound = false;
+
+            for (const auto& layerProperties : availableLayers) {
+                if (strcmp(layerName, layerProperties.layerName) == 0) {
+                    layerFound = true;
+                    break;
+                }
+            }
+
+            if (!layerFound) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    std::vector<const char *> Instance::GetRequiredExtensions() {
+        uint32_t glfwExtensionCount;
+        const char** glfwExtensions;
+        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+        if (enableValidationLayers) {
+            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        }
+        return extensions;
     }
 
     void Instance::CreateInstance() {
@@ -22,12 +67,10 @@ namespace vulcraft {
         m_createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         m_createInfo.pApplicationInfo = &m_appInfo;
 
-        vkEnumerateInstanceExtensionProperties(nullptr, &m_extensionCount, nullptr);
+        auto extensions = GetRequiredExtensions();
 
-        m_extensions = glfwGetRequiredInstanceExtensions(&m_extensionCount);
-
-        m_createInfo.enabledExtensionCount = m_extensionCount;
-        m_createInfo.ppEnabledExtensionNames = m_extensions;
+        m_createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+        m_createInfo.ppEnabledExtensionNames = extensions.data();
 
         m_createInfo.enabledLayerCount = 0;
 

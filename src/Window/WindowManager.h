@@ -8,9 +8,8 @@ namespace vulcraft {
     class WindowManager {
         public:
         WindowManager();
-        ~WindowManager();
 
-        void CreateWindow(uint32_t width, uint32_t height, char* title);
+        void CreateWindow(uint32_t width, uint32_t height, const char* title);
 
         bool IsWindowShouldClose(GLFWwindow* window) { return glfwWindowShouldClose(window); };
         GLFWwindow* GetWindow() { return m_window; };

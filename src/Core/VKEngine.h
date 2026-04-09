@@ -3,6 +3,7 @@
 
 #include "../Window/WindowManager.h"
 #include "Instance.h"
+#include "Device.h"
 
 namespace vulcraft {
     class VKEngine {
@@ -15,6 +16,7 @@ namespace vulcraft {
         private:
         WindowManager* _windowManager = nullptr;
         Instance* _instance = nullptr;
+        Device* _device = nullptr;
 
         void MainLoop(GLFWwindow* window);
         void Cleanup();
