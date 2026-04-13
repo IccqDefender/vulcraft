@@ -1,10 +1,12 @@
 #include "window.h"
 
 #include <stdexcept>
+#include "../utils/Logger.h"
 
 void window::CreateWindow(uint32_t width, uint32_t height, const char* title) {
     if (!glfwInit()) {
-        throw std::runtime_error("[GLFW]: failed to initialize GLFW!");
+        LOG_ERROR(Logger::Tag::Core, "Failed to initialize glfw!");
+        __builtin_trap();
     }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -12,7 +14,8 @@ void window::CreateWindow(uint32_t width, uint32_t height, const char* title) {
 
     m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     if (!m_window) {
-        throw std::runtime_error("[GLFW]: failed to create window!");
+        LOG_ERROR(Logger::Tag::Core, "Failed to initialize glfw!");
+        __builtin_trap();
     }
     glfwMakeContextCurrent(m_window);
 }

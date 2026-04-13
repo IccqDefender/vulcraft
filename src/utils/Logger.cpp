@@ -58,6 +58,7 @@ const char* Logger::LevelToColor(Level level) {
         case Level::Error: return "\033[31m";
         case Level::Critical: return "\033[41m";
     }
+    return "\033[0m";
 }
 
 void Logger::Log(Level level, Tag tag, const std::string &message) {

@@ -4,6 +4,9 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "../utils/Debug.h"
+#include "../utils/Logger.h"
+
 #include "window.h"
 
 class vk {

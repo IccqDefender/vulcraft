@@ -1,6 +1,8 @@
 #ifndef VULCRAFT_LOGGER_H
 #define VULCRAFT_LOGGER_H
 
+#include "LoggerMacros.h"
+
 #include <string>
 #include <mutex>
 #include <fstream>
