@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "window.h"
+#include "../renderer/vulkan/VulkanContext.h"
 
 class vk {
 public:
@@ -12,7 +13,9 @@ public:
 
 private:
     std::unique_ptr<window> _window;
+    std::unique_ptr<VulkanContext> _vkContext;
 
+private:
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
     const char* TITLE = "vulcraft";

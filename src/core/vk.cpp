@@ -12,6 +12,9 @@ void vk::Run() {
     _window = std::make_unique<window>();
     _window->CreateWindow(WIDTH, HEIGHT, TITLE);
 
+    _vkContext = std::make_unique<VulkanContext>();
+    _vkContext->Init(_window->GetCurrentWindow());
+
     LOG_INFO(Logger::Tag::Core, "Start main loop..");
     while (m_running && !_window->ShouldClose()) {
         MainLoop();
@@ -34,5 +37,10 @@ void vk::Stop() {
     if (_window) {
         _window->CleanupWindow();
         _window.reset();
+    }
+
+    if (_vkContext) {
+        _vkContext->Cleanup();
+        _vkContext.reset();
     }
 }
