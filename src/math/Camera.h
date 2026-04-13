@@ -1,0 +1,4 @@
+#ifndef VULCRAFT_CAMERA_H
+#define VULCRAFT_CAMERA_H
+
+#endif //VULCRAFT_CAMERA_H

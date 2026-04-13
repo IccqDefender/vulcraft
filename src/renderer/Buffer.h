@@ -1,0 +1,4 @@
+#ifndef VULCRAFT_BUFFER_H
+#define VULCRAFT_BUFFER_H
+
+#endif //VULCRAFT_BUFFER_H

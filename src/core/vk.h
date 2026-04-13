@@ -1,11 +1,7 @@
 #ifndef VULCRAFT_VK_H
 #define VULCRAFT_VK_H
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
-#include "../utils/Debug.h"
-#include "../utils/Logger.h"
+#include <memory>
 
 #include "window.h"
 
@@ -15,7 +11,7 @@ public:
     void Stop();
 
 private:
-    window* _window = nullptr;
+    std::unique_ptr<window> _window;
 
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
@@ -23,6 +19,7 @@ private:
 
     void MainLoop();
 
+    bool m_running = false;
 };
 
 

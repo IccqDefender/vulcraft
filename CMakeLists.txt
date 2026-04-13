@@ -75,7 +75,19 @@ add_executable(vulcraft src/main.cpp
         src/utils/Logger.cpp
         src/utils/Logger.h
         src/utils/LoggerMacros.h
-        src/utils/Debug.h)
+        src/utils/Debug.h
+        src/renderer/VulkanContext.h
+        src/renderer/Swapchain.h
+        src/renderer/Pipeline.h
+        src/renderer/Buffer.h
+        src/resources/ShaderLoader.h
+        src/resources/TextureLoader.h
+        src/renderer/Renderer.cpp
+        src/renderer/Renderer.h
+        src/math/Camera.h
+        src/math/Transform.h
+        src/systems/InputSystem.h
+)
 
 add_dependencies(vulcraft Shaders)
 
